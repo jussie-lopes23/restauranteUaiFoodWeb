@@ -1,17 +1,36 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-// 1. Importe a nova página de Login
-import LoginPage from './pages/Login'; 
-import App from './App';
+// Nossos componentes de layout de rota
+import PrivateRoute from '../src/components/PrivateRoute';
+import GuestRoute from '../src/components/GuestRoute';
+
+// Nossas páginas
+import LoginPage from './pages/Login';
+import RegisterPage from './pages/Register';
+import HomePage from './pages/Home';
 
 export function Router() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<App />} />
+        {/* --- Rotas Protegidas (Só para usuários LOGADOS) --- */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<HomePage />} />
+          {/* Adicione aqui outras rotas logadas:
+            <Route path="/meus-pedidos" element={<MeusPedidosPage />} />
+            <Route path="/perfil" element={<PerfilPage />} />
+          */}
+        </Route>
 
-        {/* 2. Adicione a Rota de Login */}
-        <Route path="/login" element={<LoginPage />} />
+        {/* --- Rotas de Convidado (Só para usuários DESLOGADOS) --- */}
+        <Route element={<GuestRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Route>
+
+        {/* Você pode adicionar aqui rotas públicas (ex: 404)
+          <Route path="*" element={<Pagina404 />} />
+        */}
       </Routes>
     </BrowserRouter>
   );

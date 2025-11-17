@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// 1. IMPORTE O 'Link' AQUI
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth'; // Nosso hook!
 import api from '../../services/api'; // Nosso axios
 import axios from 'axios'; // Importamos o axios padrão para checar o tipo de erro
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'; // Para os pop-ups
 
 export default function LoginPage() {
   // 1. Hooks
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null); // Para mensagens de erro
-  
+
   const navigate = useNavigate(); // Para redirecionar
   const { login } = useAuth(); // Nossa função de login do Contexto
 
@@ -34,11 +35,8 @@ export default function LoginPage() {
 
       const { token } = response.data;
 
-      // 2. DISPARE O POP-UP DE SUCESSO!
-      toast.success('Login realizado com sucesso!');
-
       // 4. Chamar a função de login do Contexto
-      // (Isso vai salvar o token, buscar o usuário (com /me) e redirecionar)
+      toast.success('Login realizado com sucesso!');
       await login(token);
 
       // 5. Redirecionar para a Home
@@ -47,15 +45,14 @@ export default function LoginPage() {
     } catch (err: unknown) {
       // 6. Tratamento de Erro
       if (axios.isAxiosError(err) && err.response) {
+        // Pega a mensagem de erro que vem do nosso back-end (ex: "E-mail ou senha inválidos.")
         const errorMessage = err.response.data.message || 'Falha no login. Verifique suas credenciais.';
-        
-        // 4. (Opcional) Use um pop-up de erro também!
         toast.error(errorMessage);
-        setError(errorMessage); // Você pode manter ambos
-        
+        setError(errorMessage);
       } else {
-        toast.error('Ocorreu um erro inesperado. Tente novamente.');
-        setError('Ocorreu um erro inesperado. Tente novamente.');
+        const errorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
+        toast.error(errorMessage);
+        setError(errorMessage);
       }
       console.error('Erro no login:', err);
     }
@@ -119,6 +116,18 @@ export default function LoginPage() {
             Entrar
           </button>
         </form>
+
+        {/* 2. ADICIONE O LINK DE CADASTRO AQUI */}
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Não possui uma conta?{' '}
+          <Link
+            to="/register"
+            className="font-medium text-green-600 hover:text-green-500 hover:underline"
+          >
+            Então cadastre-se
+          </Link>
+        </p>
+
       </div>
     </div>
   );
