@@ -39,8 +39,15 @@ export default function LoginPage() {
       toast.success('Login realizado com sucesso!');
       await login(token);
 
-      // 5. Redirecionar para a Home
-      navigate('/');
+      // 4. Chamar a função de login... que agora DEVOLVE o utilizador
+      const loggedInUser = await login(token);
+
+      // 5. REDIRECIONAMENTO INTELIGENTE
+      if (loggedInUser.type === 'ADMIN') {
+        navigate('/admin/pedidos'); // Admin vai para o painel
+      } else {
+        navigate('/'); // Cliente vai para a home
+      }
 
     } catch (err: unknown) {
       // 6. Tratamento de Erro

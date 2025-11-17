@@ -4,6 +4,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import PrivateRoute from '../src/components/PrivateRoute';
 import GuestRoute from '../src/components/GuestRoute';
 import Layout from '../src/components/Layout';
+import AdminRoute from '../src/components/AdminRoute';
+import AdminLayout from '../src/components/AdminLayout';
+import ClientOnlyRoute from '../src/components/ClientOnlyRoute';
+
 
 // Nossas páginas
 import LoginPage from './pages/Login';
@@ -17,33 +21,49 @@ import ProfilePage from './pages/MyAccount/ProfilePage';
 import ChangePasswordPage from './pages/MyAccount/ChangePasswordPage';
 import AddressesPage from './pages/MyAccount/AddressesPage';
 import OrderDetailsPage from './pages/OrderDetails';
+import AdminOrdersPage from './pages/AdminOrders';
+import AdminItemsPage from './pages/AdminItems';
+import AdminCategoriesPage from './pages/AdminCategories';
+import AdminUsersPage from './pages/AdminUsers';
+
 
 export function Router() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* --- Rotas Protegidas (Só para usuários LOGADOS) --- */}
+        {/* --- Rotas Protegidas --- */}
         <Route element={<PrivateRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/cardapio" element={<MenuPage />} /> {/* 2. ADICIONE a rota */}
-            <Route path="/carrinho" element={<CartPage />} />
-            <Route path="/meus-pedidos" element={<MyOrdersPage />} />
-            <Route path="/pedidos/:id" element={<OrderDetailsPage />} />
-
-            {/* 3. ADICIONE AS ROTAS ANINHADAS DE PERFIL */}
-            <Route path="/perfil" element={<MyAccountPage />}>
-              {/* Esta é a rota "index" (padrão) de /perfil */}
-              <Route index element={<ProfilePage />} />
-              <Route path="senha" element={<ChangePasswordPage />} />
-              <Route path="enderecos" element={<AddressesPage />} />
-              {/* (Adicionaremos '/perfil/enderecos' aqui) */}
+          
+          {/* --- 2. ROTAS SÓ PARA CLIENTES --- */}
+          {/* Envolve o Layout do cliente com o ClientOnlyRoute */}
+          <Route element={<ClientOnlyRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/cardapio" element={<MenuPage />} />
+              <Route path="/carrinho" element={<CartPage />} />
+              <Route path="/meus-pedidos" element={<MyOrdersPage />} />
+              <Route path="/pedidos/:id" element={<OrderDetailsPage />} />
+              <Route path="/perfil" element={<MyAccountPage />}>
+                <Route index element={<ProfilePage />} />
+                <Route path="senha" element={<ChangePasswordPage />} />
+                <Route path="enderecos" element={<AddressesPage />} />
+              </Route>
             </Route>
-            
           </Route>
+
+          {/* --- 3. ROTAS SÓ PARA ADMIN --- */}
+          <Route element={<AdminRoute />}> 
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/pedidos" element={<AdminOrdersPage />} />
+              <Route path="/admin/itens" element={<AdminItemsPage />} />
+              <Route path="/admin/categorias" element={<AdminCategoriesPage />} />
+              <Route path="/admin/usuarios" element={<AdminUsersPage />} />
+            </Route>
+          </Route>
+
         </Route>
 
-        {/* --- Rotas de Convidado (Só para usuários DESLOGADOS) --- */}
+        {/* --- Rotas de Convidado --- */}
         <Route element={<GuestRoute />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

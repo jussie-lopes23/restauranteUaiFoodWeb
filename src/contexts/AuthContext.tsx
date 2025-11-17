@@ -16,7 +16,7 @@ interface AuthContextData {
   user: User | null;         // Os dados do usuário logado
   token: string | null;      // O JWT
   loading: boolean;          // True enquanto valida o token na inicialização
-  login: (token: string) => Promise<void>; // Função de Login
+  login: (token: string) => Promise<User>;
   logout: () => void;           // Função de Logout
 }
 
@@ -76,9 +76,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await api.get('/users/me');
       setUser(response.data);
       setToken(newToken);
+
+      return response.data;
       
     } catch (err) {
       console.error("Falha no login:", err);
+      logout(); 
+      throw err; // Lança o erro para quem chamou tratar
     } finally {
       setLoading(false);
     }

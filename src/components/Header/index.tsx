@@ -28,12 +28,24 @@ export default function Header() {
         <div className="flex items-center space-x-6">
           {user ? (
             // --- Se estiver LOGADO ---
+            
             <>
               {/* Mostra o nome do usuário */}
 
               <span className="text-gray-700">
                 Olá, <span className="font-semibold">{user.name}</span>
               </span>
+
+              {/* --- NOVO LINK DE ADMIN --- */}
+              {/* Só aparece se o utilizador for ADMIN */}
+              {user.type === 'ADMIN' && (
+                <Link
+                  to="/admin/pedidos" // Link para a futura pág. de gestão
+                  className="rounded-md bg-yellow-400 px-3 py-1 font-bold text-yellow-900 hover:bg-yellow-300"
+                >
+                  Painel Admin
+                </Link>
+              )}
 
               <Link
                 to="/cardapio"
