@@ -8,6 +8,7 @@ interface User {
   name: string;
   email: string;
   type: 'CLIENT' | 'ADMIN';
+  phone: string;
 }
 
 // 2. Define o que o nosso Contexto vai fornecer
