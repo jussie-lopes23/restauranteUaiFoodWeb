@@ -44,10 +44,55 @@ export default function AdminUsersPage() {
 
   // --- 5. Handlers (Mudar Tipo e Deletar) ---
   const handleRoleChange = async (userId: string, newRole: UserType) => {
-    // ... (lógica do handleRoleChange - sem alteração)
+    // 1. Bloqueia auto-edição (Frontend Check)
+    if (userId === adminUser?.id) {
+      toast.error('Você não pode alterar seu próprio tipo.');
+      return;
+    }
+
+    try {
+      // 2. Chamar a API PUT
+      await api.put(`/users/${userId}`, { type: newRole });
+      toast.success(`Tipo do usuário ${newRole} atualizado com sucesso!`);
+      
+      // 3. Atualiza a lista localmente (para que o dropdown não reverta)
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
+          u.id === userId ? { ...u, type: newRole } : u
+        )
+      );
+
+    } catch (err: unknown) {
+      console.error('Erro ao mudar tipo:', err);
+      toast.error('Não foi possível atualizar o tipo.');
+      
+      // Se houver erro, forçamos um refetch para o dropdown voltar ao valor correto
+      fetchUsers(); 
+    }
   };
+
   const handleDelete = async (userId: string) => {
-    // ... (lógica do handleDelete - sem alteração)
+    // 1. Bloqueia auto-deleção (Frontend Check)
+    if (userId === adminUser?.id) {
+      toast.error('Você não pode deletar a si mesmo.');
+      return;
+    }
+    
+    if (window.confirm('Tem certeza que quer deletar este usuário? Esta ação é irreversível.')) {
+      try {
+        // 2. Chamar a API DELETE
+        await api.delete(`/users/${userId}`);
+        toast.success('Usuário deletado com sucesso.');
+        await fetchUsers(); // Atualiza a lista
+        
+      } catch (err: any) {
+        if (err.response?.status === 409) {
+          toast.error('Não é possível deletar: este usuário possui pedidos cadastrados.');
+        } else {
+          toast.error('Não foi possível deletar o usuário.');
+        }
+      }
+    }
   };
 
   // --- NOVO: Lógica de Filtragem ---
