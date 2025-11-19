@@ -1,50 +1,44 @@
 import React, { createContext, useReducer, useEffect, useContext } from 'react';
-import type { ReactNode } from 'react'; // Importa o TIPO separadamente
+import type { ReactNode } from 'react';
 import { toast } from 'react-hot-toast';
 
-// --- 1. Definição de Tipos ---
-
-// O tipo de UM item dentro do carrinho
 export interface CartItem {
   id: string;
   description: string;
-  unitPrice: number; // Vamos guardar como número
+  unitPrice: number; 
   quantity: number;
 }
 
-// O estado do nosso carrinho
+
 interface CartState {
   items: CartItem[];
 }
 
-// As ações que podemos tomar no carrinho
+
 type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
   | { type: 'REMOVE_ITEM'; payload: { id: string } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR_CART' }
-  | { type: 'SET_STATE'; payload: CartState }; // Para carregar do localStorage
+  | { type: 'SET_STATE'; payload: CartState }; 
 
-// O que o nosso Contexto vai fornecer
+
 interface CartContextData {
   state: CartState;
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
-  // (Funções úteis que podemos adicionar depois)
   totalPrice: () => number;
   totalItems: () => number;
 }
 
-// --- 2. O Reducer (A Lógica do Carrinho) ---
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'ADD_ITEM': {
       const existingItem = state.items.find((i) => i.id === action.payload.id);
       if (existingItem) {
-        // Se o item já existe, apenas aumenta a quantidade
         //toast.success(`${action.payload.description} adicionado ao carrinho!`);
         return {
           ...state,
@@ -55,7 +49,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           ),
         };
       } else {
-        // Se for um novo item
         //toast.success(`${action.payload.description} adicionado ao carrinho!`);
         return {
           ...state,
@@ -73,7 +66,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     }
 
     case 'UPDATE_QUANTITY': {
-      // Se a quantidade for 0 ou menos, remove o item
       if (action.payload.quantity <= 0) {
         return cartReducer(state, { type: 'REMOVE_ITEM', payload: { id: action.payload.id } });
       }
@@ -98,7 +90,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
-// --- 3. Criação do Contexto e Provider ---
 
 const initialState: CartState = {
   items: [],
@@ -114,9 +105,7 @@ interface CartProviderProps {
 const STORAGE_KEY = '@UaiFood:cart';
 
 export function CartProvider({ children }: CartProviderProps) {
-  // Usamos useReducer em vez de useState
   const [state, dispatch] = useReducer(cartReducer, initialState, (initial) => {
-    // Tenta carregar o estado inicial do localStorage
     try {
       const storedCart = localStorage.getItem(STORAGE_KEY);
       return storedCart ? (JSON.parse(storedCart) as CartState) : initial;
@@ -131,8 +120,7 @@ export function CartProvider({ children }: CartProviderProps) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  // --- 4. Funções que os componentes vão chamar ---
-
+ 
   const addItem = (item: CartItem) => {
 
     const existingItem = state.items.find((i) => i.id === item.id);
@@ -157,7 +145,6 @@ export function CartProvider({ children }: CartProviderProps) {
     dispatch({ type: 'CLEAR_CART' });
   };
 
-  // Funções auxiliares
   const totalPrice = () => {
     return state.items.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
   };
@@ -183,7 +170,6 @@ export function CartProvider({ children }: CartProviderProps) {
   );
 }
 
-// --- 5. Hook Personalizado (Atalho) ---
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {

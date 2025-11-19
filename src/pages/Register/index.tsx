@@ -1,9 +1,8 @@
 import { useState } from 'react';
-// 1. IMPORTE O 'Link' AQUI
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../../services/api'; // O nosso axios
-import axios from 'axios'; // Para verificar o tipo de erro
-import { toast } from 'react-hot-toast'; // Para os pop-ups
+import api from '../../services/api'; 
+import axios from 'axios'; 
+import { toast } from 'react-hot-toast'; 
 
 export default function RegisterPage() {
   // 1. Hooks
@@ -15,14 +14,14 @@ export default function RegisterPage() {
 
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const navigate = useNavigate(); // Para redirecionar
+  const navigate = useNavigate();
 
-  // 2. Função de Submit
+  // Função de Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Validação simples (o Zod do back-end fará a validação pesada)
+    
     if (!name || !email || !phone || !password) {
       setError('Por favor, preencha todos os campos.');
       return;
@@ -35,7 +34,7 @@ export default function RegisterPage() {
     }
 
     try {
-      // 3. Chamar a API de Registo
+      //Chamar a API de Registo
       await api.post('/users', {
         name,
         email,
@@ -44,14 +43,14 @@ export default function RegisterPage() {
         acceptsTerms: acceptTerms,
       });
 
-      // 4. Feedback de sucesso e redirecionamento
+      
       toast.success('Conta criada com sucesso! Faça o login.');
-      navigate('/login'); // Redireciona para o login
+      navigate('/login'); 
 
     } catch (err: unknown) {
-      // 5. Tratamento de Erro
+      
       if (axios.isAxiosError(err) && err.response) {
-        // Pega a mensagem de erro do back-end (ex: "Este e-mail já está em uso.")
+        
         const errorMessage = err.response.data.message || 'Falha ao criar conta.';
         toast.error(errorMessage);
         setError(errorMessage);
@@ -63,7 +62,7 @@ export default function RegisterPage() {
     }
   };
 
-  // 3. JSX com Tailwind
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
@@ -77,9 +76,6 @@ export default function RegisterPage() {
               {error}
             </div>
           )}
-
-
-          {/* ... (Todos os seus campos de input: Nome, E-mail, Telefone, Senha) ... */}
 
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -154,16 +150,14 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            // Desabilita o botão se os termos não forem aceitos
             disabled={!acceptTerms} 
             className="w-full rounded-md bg-green-600 p-2 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-            disabled:cursor-not-allowed disabled:opacity-50" // Estilos de desabilitado
+            disabled:cursor-not-allowed disabled:opacity-50" 
           >
             Criar Conta
           </button>
         </form>
 
-        {/* 2. ADICIONE O LINK DE LOGIN AQUI */}
         <p className="mt-6 text-center text-sm text-gray-600">
           Já possui uma conta?{' '}
           <Link

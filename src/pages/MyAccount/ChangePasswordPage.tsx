@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import axios from 'axios'; // Para tratar erros da API
+import axios from 'axios'; 
 
 export default function ChangePasswordPage() {
   const [oldPassword, setOldPassword] = useState('');
@@ -13,7 +13,6 @@ export default function ChangePasswordPage() {
     e.preventDefault();
     setLoading(true);
 
-    // 1. Validação no Front-end
     if (newPassword !== confirmPassword) {
       toast.error('As novas senhas não coincidem.');
       setLoading(false);
@@ -26,20 +25,17 @@ export default function ChangePasswordPage() {
     }
 
     try {
-      // 2. Chamar a API
       await api.put('/users/me/password', {
         oldPassword,
         newPassword,
       });
 
       toast.success('Senha alterada com sucesso!');
-      // 3. Limpar o formulário
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
       console.error('Erro ao alterar senha:', err);
-      // 4. Tratar erro (ex: senha antiga errada)
       if (axios.isAxiosError(err) && err.response) {
         if (err.response.status === 401) {
           toast.error('A sua senha antiga está incorreta.');
@@ -61,7 +57,6 @@ export default function ChangePasswordPage() {
       <h2 className="mb-6 text-2xl font-semibold text-gray-800">Mudar Senha</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Senha Antiga */}
         <div>
           <label
             htmlFor="oldPassword"
@@ -79,7 +74,6 @@ export default function ChangePasswordPage() {
           />
         </div>
 
-        {/* Nova Senha */}
         <div>
           <label
             htmlFor="newPassword"
@@ -97,7 +91,6 @@ export default function ChangePasswordPage() {
           />
         </div>
 
-        {/* Confirmar Nova Senha */}
         <div>
           <label
             htmlFor="confirmPassword"

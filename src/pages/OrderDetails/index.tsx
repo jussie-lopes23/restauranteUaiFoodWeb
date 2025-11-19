@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 
-// --- 1. Definição de Tipos (Igual à pág. Meus Pedidos) ---
+
 interface Item {
   id: string;
   description: string;
@@ -16,7 +16,6 @@ interface OrderItem {
   item: Item;
 }
 
-// NOVO: Precisamos do tipo de Endereço
 interface Address {
   street: string;
   number: string;
@@ -31,10 +30,10 @@ interface Order {
   paymentMethod: 'CASH' | 'DEBIT' | 'CREDIT' | 'PIX';
   createdAt: string;
   orderItems: OrderItem[];
-  address: Address; // O back-end anexa o endereço
+  address: Address; 
 }
 
-// Funções auxiliares de formatação (pode copiá-las de MyOrdersPage)
+
 const formatCurrency = (value: number | string) => {
   const numericValue = typeof value === 'string' ? parseFloat(value) : value;
   return new Intl.NumberFormat('pt-BR', {
@@ -54,16 +53,14 @@ const formatDate = (dateString: string) => {
 };
 
 export default function OrderDetailsPage() {
-  // --- 2. Hooks de Estado ---
+  
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // O useParams() pega o ID da URL (ex: /pedidos/clx123)
   const { id } = useParams<{ id: string }>();
 
-  // --- 3. Busca de Dados ---
   useEffect(() => {
-    if (!id) return; // Proteção caso o ID não exista
+    if (!id) return; 
 
     async function fetchOrderDetails() {
       try {
@@ -83,9 +80,8 @@ export default function OrderDetailsPage() {
     }
 
     fetchOrderDetails();
-  }, [id]); // Roda sempre que o ID na URL mudar
+  }, [id]); 
 
-  // --- 4. Renderização ---
 
   if (loading) {
     return (
@@ -109,7 +105,6 @@ export default function OrderDetailsPage() {
     );
   }
 
-  // Calcula o total
   const orderTotal = order.orderItems.reduce((total, item) => {
     return total + parseFloat(item.unitPrice) * item.quantity;
   }, 0);
@@ -124,7 +119,7 @@ export default function OrderDetailsPage() {
       </Link>
       
       <div className="rounded-lg bg-white p-6 shadow-md">
-        {/* Cabeçalho */}
+        
         <div className="mb-4 flex flex-col justify-between border-b pb-4 sm:flex-row">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
@@ -148,13 +143,9 @@ export default function OrderDetailsPage() {
           </div>
         </div>
 
-        {/* Grelha de Detalhes */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Endereço de Entrega */}
           <div>
             <h2 className="mb-2 text-lg font-semibold text-gray-800">Endereço de Entrega</h2>
-            
-            {/* Adiciona uma verificação: só renderiza se o endereço existir */}
             {order.address ? (
               <div className="text-gray-700">
                 <p>{order.address.street}, {order.address.number}</p>
@@ -167,14 +158,12 @@ export default function OrderDetailsPage() {
             
           </div>
           
-          {/* Pagamento */}
           <div>
             <h2 className="mb-2 text-lg font-semibold text-gray-800">Pagamento</h2>
             <p className="text-gray-700">{order.paymentMethod}</p>
           </div>
         </div>
 
-        {/* Itens do Pedido */}
         <div className="mt-6 border-t pt-6">
           <h2 className="mb-4 text-lg font-semibold text-gray-800">Itens Inclusos</h2>
           <ul className="space-y-2">
@@ -191,7 +180,6 @@ export default function OrderDetailsPage() {
           </ul>
         </div>
 
-        {/* Total */}
         <div className="mt-6 border-t pt-6 text-right">
           <p className="text-2xl font-bold text-gray-900">
             Total do Pedido: {formatCurrency(orderTotal)}

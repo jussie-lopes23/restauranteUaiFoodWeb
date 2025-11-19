@@ -1,12 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-/**
- * Protege rotas que são EXCLUSIVAS para Clientes.
- * Se um Admin tentar aceder, é redirecionado para o seu painel.
- */
+//Protege rotas que são EXCLUSIVAS para Clientes. Se um Admin tentar aceder, é redirecionado para o seu painel.
 export default function ClientOnlyRoute() {
-  const { user } = useAuth(); // PrivateRoute (que está antes) já garante que user existe
+  const { user } = useAuth(); 
 
   // Se for ADMIN, redireciona para o painel de admin
   if (user?.type === 'ADMIN') {

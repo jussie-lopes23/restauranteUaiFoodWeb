@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 
-// --- 1. Definição de Tipos ---
-// (Estes tipos são do back-end. Note que o 'client' está incluído)
 
 interface Client {
   name: string;
@@ -28,11 +26,10 @@ interface AdminOrder {
   status: OrderStatus;
   paymentMethod: string;
   createdAt: string;
-  client: Client; // O admin vê quem é o cliente
+  client: Client; 
   orderItems: OrderItem[];
 }
 
-// Lista de status possíveis que o admin pode definir
 const possibleStatuses: OrderStatus[] = [
   'PENDING',
   'PREPARING',
@@ -41,7 +38,6 @@ const possibleStatuses: OrderStatus[] = [
   'CANCELLED',
 ];
 
-// Funções auxiliares (copiadas de MyOrdersPage)
 const formatCurrency = (value: number | string) => {
   const numericValue = typeof value === 'string' ? parseFloat(value) : value;
   return new Intl.NumberFormat('pt-BR', {
@@ -61,16 +57,14 @@ const formatDate = (dateString: string) => {
 };
 
 export default function AdminOrdersPage() {
-  // --- 2. Hooks de Estado ---
+
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // --- 3. Função para buscar TODOS os pedidos ---
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      // O token de Admin (do AuthContext) garante que esta rota
-      // retorne todos os pedidos
+      
       const response = await api.get('/orders');
       setOrders(response.data);
     } catch (err) {
@@ -81,24 +75,20 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // --- 4. Buscar pedidos quando a página carregar ---
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  // --- 5. Função para ATUALIZAR O STATUS ---
   const handleStatusChange = async (
     orderId: string,
     newStatus: OrderStatus
   ) => {
     try {
-      // Chama a API PATCH do admin
       await api.patch(`/orders/${orderId}/status`, {
         status: newStatus,
       });
       toast.success('Status do pedido atualizado!');
       
-      // Atualiza a lista localmente (mais rápido que um novo fetch)
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: newStatus } : order
@@ -111,7 +101,6 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // --- 6. Renderização ---
 
   if (loading) {
     return (
@@ -139,7 +128,6 @@ export default function AdminOrdersPage() {
                 key={order.id}
                 className="rounded-lg bg-white p-6 shadow-md"
               >
-                {/* Cabeçalho do Pedido */}
                 <div className="mb-4 flex flex-col justify-between border-b pb-4 sm:flex-row">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-800">
@@ -152,7 +140,6 @@ export default function AdminOrdersPage() {
                       Feito em: {formatDate(order.createdAt)}
                     </p>
                   </div>
-                  {/* Seletor de Status (Apenas para Admin) */}
                   <div className="mt-2 sm:mt-0">
                     <label className="mb-1 block text-sm font-medium text-gray-700">
                       Mudar Status:
@@ -173,7 +160,6 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
 
-                {/* Itens do Pedido */}
                 <div className="mb-4">
                   <h3 className="mb-2 text-md font-semibold text-gray-700">Itens:</h3>
                   <ul className="list-inside list-disc space-y-1 pl-2">
@@ -186,7 +172,6 @@ export default function AdminOrdersPage() {
                   </ul>
                 </div>
 
-                {/* Rodapé do Pedido */}
                 <div className="border-t pt-4">
                   <p className="text-right text-lg font-bold text-gray-900">
                     Total: {formatCurrency(orderTotal)}

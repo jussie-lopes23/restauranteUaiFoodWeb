@@ -3,9 +3,6 @@ import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
-// --- 1. Definição de Tipos (Importante) ---
-// Estes tipos devem corresponder ao que a sua API retorna
-// (especialmente a API GET /api/orders)
 
 interface Item {
   id: string;
@@ -23,11 +20,10 @@ interface Order {
   id: string;
   status: string;
   paymentMethod: 'CASH' | 'DEBIT' | 'CREDIT' | 'PIX';
-  createdAt: string; // O Prisma envia datas como strings ISO (ex: "2023-11-17T...")
+  createdAt: string; 
   orderItems: OrderItem[];
 }
 
-// Função para formatar moeda
 const formatCurrency = (value: number | string) => {
   const numericValue = typeof value === 'string' ? parseFloat(value) : value;
   return new Intl.NumberFormat('pt-BR', {
@@ -36,7 +32,6 @@ const formatCurrency = (value: number | string) => {
   }).format(numericValue);
 };
 
-// Função para formatar data
 const formatDate = (dateString: string) => {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
@@ -48,16 +43,14 @@ const formatDate = (dateString: string) => {
 };
 
 export default function MyOrdersPage() {
-  // --- 2. Hooks de Estado ---
+ 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // --- 3. Busca de Dados ---
   useEffect(() => {
     async function fetchOrders() {
       try {
         setLoading(true);
-        // Graças ao nosso AuthContext, esta chamada já inclui o token
         const response = await api.get('/orders');
         setOrders(response.data);
       } catch (err) {
@@ -69,9 +62,8 @@ export default function MyOrdersPage() {
     }
 
     fetchOrders();
-  }, []); // O array vazio [] garante que rode só uma vez
+  }, []); 
 
-  // --- 4. Renderização ---
 
   if (loading) {
     return (
@@ -81,7 +73,6 @@ export default function MyOrdersPage() {
     );
   }
 
-  // Se não houver pedidos
   if (orders.length === 0) {
     return (
       <div className="mx-auto max-w-7xl p-8 text-center">
@@ -99,29 +90,24 @@ export default function MyOrdersPage() {
     );
   }
 
-  // Se houver pedidos
+  
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       <h1 className="mb-8 text-3xl font-bold text-gray-900">Meus Pedidos</h1>
 
       <div className="space-y-6">
-        {/* Loop pelos Pedidos */}
         {orders.map((order) => {
-          // Calcula o total do pedido
           const orderTotal = order.orderItems.reduce((total, item) => {
             return total + parseFloat(item.unitPrice) * item.quantity;
           }, 0);
 
           return (
             <Link
-            key={order.id} // <-- A ÚNICA key, no elemento <Link>
-            to={`/pedidos/${order.id}`} // Link para a página de detalhes
+            key={order.id} 
+            to={`/pedidos/${order.id}`} 
             className="block rounded-lg bg-white p-6 shadow-md transition-shadow hover:shadow-lg"
           >
-            {/* O conteúdo do pedido vem direto aqui, 
-                REMOVA o <div key={order.id}...> que estava aqui */}
-
-            {/* Cabeçalho do Pedido */}
+            
             <div className="mb-4 flex flex-col justify-between border-b pb-4 sm:flex-row">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">
@@ -145,7 +131,6 @@ export default function MyOrdersPage() {
               </div>
             </div>
 
-            {/* Itens do Pedido */}
             <div className="mb-4">
               <h3 className="mb-2 text-md font-semibold text-gray-700">Itens:</h3>
               <ul className="list-inside list-disc space-y-1 pl-2">
@@ -158,7 +143,6 @@ export default function MyOrdersPage() {
               </ul>
             </div>
 
-            {/* Rodapé do Pedido */}
             <div className="border-t pt-4">
               <p className="text-right text-lg font-bold text-gray-900">
                 Total: {formatCurrency(orderTotal)}

@@ -5,9 +5,8 @@ import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
 export default function ProfilePage() {
-  const { user, login, logout } = useAuth(); // Pegamos o 'login' para atualizar os dados do user no AuthContext
+  const { user, login, logout } = useAuth(); 
   
-  // Inicializa o estado com os dados do usuário logado
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [loading, setLoading] = useState(false);
@@ -19,12 +18,9 @@ export default function ProfilePage() {
     try {
       const response = await api.put('/users/me', { name, phone });
       
-      // 'login' é a nossa função que atualiza o AuthContext
-      // Re-chamá-la com o token antigo força uma busca /me
-      // e atualiza os dados do usuário (ex: "Olá, Jussi") no Header
       const token = localStorage.getItem('@UaiFood:token');
       if (token) {
-        await login(token); // Revalida e atualiza o 'user' global
+        await login(token); 
       }
       
       toast.success('Perfil atualizado com sucesso!');
@@ -38,7 +34,6 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    // Pede confirmação
     if (
       !window.confirm(
         'Tem a certeza? Esta ação é irreversível e irá apagar a sua conta.'
@@ -50,12 +45,9 @@ export default function ProfilePage() {
     try {
       await api.delete('/users/me');
       toast.success('Conta apagada com sucesso.');
-      // Desloga o utilizador
       logout(); 
-      // O PrivateRoute irá automaticamente redirecionar para /login
     } catch (err: unknown) {
       console.error('Erro ao apagar conta:', err);
-      // Trata o erro 409 (utilizador com pedidos)
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         toast.error(err.response.data.message);
       } else {
@@ -72,8 +64,8 @@ export default function ProfilePage() {
     <div>
       <h2 className="mb-6 text-2xl font-semibold text-gray-800">Meu Perfil</h2>
       
-      {/* E-mail (não editável) */}
       <div className="mb-4">
+
         <label className="block text-sm font-medium text-gray-700">E-mail</label>
         <input
           type="email"
@@ -85,7 +77,6 @@ export default function ProfilePage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* Campo de Nome */}
         <div className="mb-4">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
             Nome Completo
@@ -99,7 +90,6 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Campo de Telefone */}
         <div className="mb-6">
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
             Telefone

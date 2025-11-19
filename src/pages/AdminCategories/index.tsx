@@ -4,24 +4,21 @@ import { toast } from 'react-hot-toast';
 import { Trash, Edit } from 'lucide-react';
 import axios from 'axios';
 
-// --- 1. Definição de Tipos ---
 interface Category {
   id: string;
   description: string;
 }
 
 export default function AdminCategoriesPage() {
-  // --- 2. Hooks de Estado ---
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [description, setDescription] = useState(''); // Estado simples para o formulário
+  const [description, setDescription] = useState('');
   const [formLoading, setFormLoading] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
   const formRef = useRef<HTMLDivElement>(null);
 
-  // --- 3. Função para buscar os dados ---
   const fetchCategories = async () => {
     try {
       setLoading(true);
@@ -34,12 +31,10 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  // --- 4. Buscar dados ao carregar ---
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // --- 5. Handlers do Formulário ---
   const handleEditClick = (category: Category) => {
     setDescription(category.description);
     setEditingCategoryId(category.id);
@@ -56,9 +51,9 @@ export default function AdminCategoriesPage() {
       try {
         await api.delete(`/categories/${id}`);
         toast.success('Categoria apagada com sucesso.');
-        fetchCategories(); // Atualiza a lista
+        fetchCategories();
       } catch (err: any) {
-        if (err.response?.status === 409) { // (Teremos de adicionar este erro no back-end)
+        if (err.response?.status === 409) { 
           toast.error('Não é possível apagar: esta categoria está em uso por um item.');
         } else {
           toast.error('Não foi possível apagar a categoria.');
@@ -79,21 +74,20 @@ export default function AdminCategoriesPage() {
 
     try {
       if (editingCategoryId) {
-        // --- LÓGICA DE EDIÇÃO (PUT) ---
         await api.put(`/categories/${editingCategoryId}`, dataToSend);
         toast.success('Categoria atualizada com sucesso!');
       } else {
-        // --- LÓGICA DE CRIAÇÃO (POST) ---
+
         await api.post('/categories', dataToSend);
         toast.success('Categoria criada com sucesso!');
       }
 
-      handleCancelEdit(); // Limpa o formulário
-      fetchCategories(); // Atualiza a lista
+      handleCancelEdit(); 
+      fetchCategories(); 
 
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response) {
-        if (err.response.status === 409) { // Conflito (categoria já existe)
+        if (err.response.status === 409) { 
           toast.error(err.response.data.message);
         } else {
           const firstError = err.response.data.errors?.[0]?.message;
@@ -107,12 +101,10 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  // --- 6. JSX da Página ---
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       <h1 className="mb-8 text-3xl font-bold text-gray-900">Gestão de Categorias</h1>
 
-      {/* Formulário de Criação/Edição */}
       <div ref={formRef} className="mb-10 rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-6 text-2xl font-semibold text-gray-800">
           {editingCategoryId ? 'Editar Categoria' : 'Adicionar Nova Categoria'}
@@ -153,7 +145,6 @@ export default function AdminCategoriesPage() {
         </form>
       </div>
 
-      {/* Lista de Categorias Existentes */}
       <div className="rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-6 text-2xl font-semibold text-gray-800">Categorias Cadastradas</h2>
         {loading ? (

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
-import { useAuth } from '../../hooks/useAuth'; // 1. Precisamos do usuário logado
-import api from '../../services/api'; // Nosso axios
+import { useAuth } from '../../hooks/useAuth'; 
+import api from '../../services/api'; 
 import { toast } from 'react-hot-toast';
 import { Trash, Plus, Minus, Home, CreditCard } from 'lucide-react';
 
-// --- 2. Definição de Tipos ---
 interface Address {
   id: string;
   street: string;
@@ -17,7 +16,6 @@ interface Address {
   zipCode: string;
 }
 
-// O Enum do nosso back-end
 const paymentMethods = [
   { value: 'CASH', label: 'Dinheiro' },
   { value: 'DEBIT', label: 'Cartão de Débito' },
@@ -28,15 +26,14 @@ const paymentMethods = [
 export default function CartPage() {
   const { state, removeItem, updateQuantity, totalPrice, totalItems, clearCart } =
     useCart();
-  const { user } = useAuth(); // Pega o usuário (para buscar endereços)
+  const { user } = useAuth(); 
   const navigate = useNavigate();
 
-  // --- 3. Novos Estados ---
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [selectedPayment, setSelectedPayment] = useState<string>('');
 
-  // --- 4. Busca os Endereços do Usuário ---
+  
   useEffect(() => {
     // Só busca se o usuário estiver logado
     if (user) {
@@ -44,7 +41,6 @@ export default function CartPage() {
         try {
           const response = await api.get('/addresses');
           setAddresses(response.data);
-          // (Opcional) Seleciona o primeiro endereço por padrão
           if (response.data.length > 0) {
             setSelectedAddress(response.data[0].id);
           }
@@ -55,11 +51,9 @@ export default function CartPage() {
       }
       fetchAddresses();
     }
-  }, [user]); // Roda sempre que o 'user' mudar
+  }, [user]);
 
-  // --- 5. Lógica de Finalizar Pedido ---
   const handleCheckout = async () => {
-    // Validação
     if (!selectedAddress) {
       toast.error('Por favor, selecione um endereço de entrega.');
       return;
@@ -69,7 +63,6 @@ export default function CartPage() {
       return;
     }
 
-    // Prepara os dados para a API
     const orderData = {
       addressId: selectedAddress,
       paymentMethod: selectedPayment,
@@ -80,12 +73,12 @@ export default function CartPage() {
     };
 
     try {
-      // Envia o pedido para o back-end
+
       await api.post('/orders', orderData);
 
       toast.success('Pedido realizado com sucesso!');
-      clearCart(); // Limpa o carrinho
-      navigate('/meus-pedidos'); // Redireciona para a página de "Meus Pedidos"
+      clearCart(); 
+      navigate('/meus-pedidos'); 
     } catch (error: any) {
       console.error('Erro ao finalizar pedido:', error);
       const errorMsg =
@@ -95,7 +88,6 @@ export default function CartPage() {
     }
   };
 
-  // ... (função formatCurrency) ...
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -103,28 +95,38 @@ export default function CartPage() {
     }).format(value);
   };
 
-  // ... (carrinho vazio) ...
-  if (state.items.length === 0) {
-    // ... (retorno do carrinho vazio)
-  }
 
-  // --- 6. JSX Atualizado ---
+//  if (state.items.length === 0) {
+//     return (
+//       <div className="mx-auto max-w-7xl p-8 text-center">
+//         <h1 className="text-3xl font-bold text-gray-800">Seu carrinho está vazio</h1>
+//         <p className="mt-4 text-lg text-gray-600">
+//           Que tal adicionar alguns itens do nosso cardápio?
+//         </p>
+//         <Link
+//           to="/cardapio"
+//           className="mt-6 inline-block rounded-md bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
+//         >
+//           Ver Cardápio
+//         </Link>
+//       </div>
+//     );
+//   }
+
+ 
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       <h1 className="mb-8 text-3xl font-bold text-gray-900">
         Seu Carrinho ({totalItems()})
       </h1>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        {/* Coluna da Esquerda: Lista de Itens */}
         <div className="md:col-span-2">
-          {/* ... (ul e map dos itens do carrinho - igual a antes) ... */}
           <ul className="space-y-4">
             {state.items.map((item) => (
               <li
                 key={item.id}
                 className="flex flex-col rounded-lg bg-white p-4 shadow-md sm:flex-row sm:items-center sm:justify-between"
               >
-                {/* Detalhes do Item */}
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold text-gray-900">
                     {item.description}
@@ -137,7 +139,6 @@ export default function CartPage() {
                   </p>
                 </div>
 
-                {/* Controlos de Quantidade */}
                 <div className="mt-4 flex items-center justify-between sm:mt-0 sm:justify-normal sm:space-x-4">
                   <div className="flex items-center space-x-2 rounded-md border border-gray-300">
                     <button
@@ -173,12 +174,10 @@ export default function CartPage() {
           </ul>
         </div>
 
-        {/* Coluna da Direita: Resumo do Pedido (ATUALIZADO) */}
         <div className="md:col-span-1">
           <div className="rounded-lg bg-white p-6 shadow-md">
             <h2 className="mb-4 text-xl font-semibold">Resumo do Pedido</h2>
             
-            {/* Seletor de Endereço */}
             <div className="mb-4">
               <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
                 <Home size={16} className="mr-2" />
@@ -206,7 +205,6 @@ export default function CartPage() {
               )}
             </div>
 
-            {/* Seletor de Pagamento */}
             <div className="mb-6">
               <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
                 <CreditCard size={16} className="mr-2" />
@@ -226,7 +224,6 @@ export default function CartPage() {
               </select>
             </div>
 
-            {/* Totais */}
             <div className="mb-4 flex justify-between text-lg">
               <span>Total de Itens:</span>
               <span className="font-medium">{totalItems()}</span>
@@ -237,7 +234,7 @@ export default function CartPage() {
             </div>
             <button
               onClick={handleCheckout}
-              disabled={!selectedAddress || !selectedPayment} // Desabilita se faltar seleção
+              disabled={!selectedAddress || !selectedPayment}
               className="w-full rounded-md bg-green-600 p-3 text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Finalizar Pedido

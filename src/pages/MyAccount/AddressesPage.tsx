@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from 'react'; // NOVO: useRef
+import { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { Trash, MapPin, Edit } from 'lucide-react'; // NOVO: Edit
+import { Trash, MapPin, Edit } from 'lucide-react';
 import axios from 'axios';
 
-// 1. Tipo de Endereço
 interface Address {
   id: string;
   street: string;
@@ -15,7 +14,6 @@ interface Address {
   zipCode: string;
 }
 
-// 2. Estado inicial do formulário (para limpar)
 const initialFormState = {
   street: '',
   number: '',
@@ -31,13 +29,10 @@ export default function AddressesPage() {
   const [formState, setFormState] = useState(initialFormState);
   const [formLoading, setFormLoading] = useState(false);
 
-  // NOVO: Estado para saber qual endereço estamos a editar
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   
-  // NOVO: Referência ao topo do formulário para "scrollar"
   const formRef = useRef<HTMLDivElement>(null);
 
-  // 3. Função para buscar os endereços (igual)
   const fetchAddresses = async () => {
     try {
       setLoading(true);
@@ -51,36 +46,31 @@ export default function AddressesPage() {
     }
   };
 
-  // 4. Buscar endereços (igual)
   useEffect(() => {
     fetchAddresses();
   }, []);
 
-  // 5. Handler para o formulário (igual)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormState((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 6. NOVO: Handler de Submit (Adicionar OU Editar)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
 
     try {
       if (editingAddressId) {
-        // --- LÓGICA DE EDIÇÃO ---
         await api.put(`/addresses/${editingAddressId}`, formState);
         toast.success('Endereço atualizado com sucesso!');
       } else {
-        // --- LÓGICA DE ADIÇÃO ---
         await api.post('/addresses', formState);
         toast.success('Endereço adicionado com sucesso!');
       }
       
-      setFormState(initialFormState); // Limpa o formulário
-      setEditingAddressId(null); // Sai do modo de edição
-      await fetchAddresses(); // Atualiza a lista
+      setFormState(initialFormState);
+      setEditingAddressId(null);
+      await fetchAddresses();
       
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response) {
@@ -94,9 +84,7 @@ export default function AddressesPage() {
     }
   };
 
-  // 7. NOVO: Handler para clicar em "Editar"
   const handleEditClick = (address: Address) => {
-    // Preenche o formulário com os dados do endereço
     setFormState({
       street: address.street,
       number: address.number,
@@ -105,34 +93,45 @@ export default function AddressesPage() {
       state: address.state,
       zipCode: address.zipCode,
     });
-    // Define o ID que estamos a editar
+    
     setEditingAddressId(address.id);
-    // Rola a página para o topo (para o formulário)
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   
-  // 8. NOVO: Handler para "Cancelar Edição"
   const handleCancelEdit = () => {
     setFormState(initialFormState);
     setEditingAddressId(null);
   };
 
-  // 7. Handler para Deletar Endereço (igual)
-  const handleDeleteAddress = async (id: string) => {
-    // ... (código do handleDeleteAddress - sem alterações)
-  };
 
-  // --- 9. JSX da Página (Atualizado) ---
+  const handleDeleteAddress = async (id: string) => {
+    
+    const confirmDelete = window.confirm("Tem certeza que deseja excluir este endereço?");
+
+    if (confirmDelete) {
+      try {
+      
+        await api.delete(`/addresses/${id}`);
+        
+        toast.success("Endereço deletado com sucesso!");
+        
+        await fetchAddresses();
+        
+      } catch (err) {
+        console.error("Erro ao deletar endereço:", err);
+        toast.error("Erro ao deletar o endereço.");
+      }
+    }
+  };
+  
   return (
     <div>
-      {/* Formulário (agora com ref) */}
       <div ref={formRef}>
         <h2 className="mb-6 text-2xl font-semibold text-gray-800">
-          {/* NOVO: Título dinâmico */}
+    
           {editingAddressId ? 'Editar Endereço' : 'Adicionar Novo Endereço'}
         </h2>
         <form onSubmit={handleSubmit} className="mb-10 space-y-4 border-b pb-10">
-          {/* ... (todos os inputs do formulário - sem alterações) ... */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <input
               name="street"
@@ -188,7 +187,6 @@ export default function AddressesPage() {
             />
           </div>
           
-          {/* NOVO: Botões dinâmicos */}
           <div className="flex space-x-4">
             <button
               type="submit"
@@ -200,7 +198,7 @@ export default function AddressesPage() {
                 : (editingAddressId ? 'Guardar Alterações' : 'Adicionar Endereço')
               }
             </button>
-            {/* NOVO: Botão de Cancelar */}
+            
             {editingAddressId && (
               <button
                 type="button"
@@ -214,7 +212,6 @@ export default function AddressesPage() {
         </form>
       </div>
 
-      {/* Lista de Endereços Salvos */}
       <h2 className="mb-6 text-2xl font-semibold text-gray-800">Meus Endereços Salvos</h2>
       {loading ? (
         <p>A carregar endereços...</p>
@@ -228,7 +225,7 @@ export default function AddressesPage() {
                 key={addr.id}
                 className="flex items-center justify-between rounded-lg border p-4"
               >
-                {/* ... (info do endereço) ... */}
+
                 <div className="flex items-center">
                   <MapPin size={24} className="mr-4 text-gray-500" />
                   <div>
@@ -242,7 +239,6 @@ export default function AddressesPage() {
                   </div>
                 </div>
                 
-                {/* NOVO: Botões de Ação */}
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEditClick(addr)}

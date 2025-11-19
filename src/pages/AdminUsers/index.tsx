@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Trash } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
-// 1. Definição de Tipos
+
 type UserType = 'CLIENT' | 'ADMIN';
 
 interface User {
@@ -16,15 +16,15 @@ interface User {
 }
 
 export default function AdminUsersPage() {
-  // --- 2. Hooks de Estado ---
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const { user: adminUser } = useAuth();
 
-  // NOVO: Estado para o filtro de tipo
+  
   const [roleFilter, setRoleFilter] = useState<UserType | 'all'>('all');
 
-  // --- 3. Função para buscar os dados ---
+ 
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -37,25 +37,21 @@ export default function AdminUsersPage() {
     }
   };
 
-  // --- 4. Buscar dados ao carregar ---
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // --- 5. Handlers (Mudar Tipo e Deletar) ---
   const handleRoleChange = async (userId: string, newRole: UserType) => {
-    // 1. Bloqueia auto-edição (Frontend Check)
+    //Bloqueia auto-edição
     if (userId === adminUser?.id) {
       toast.error('Você não pode alterar seu próprio tipo.');
       return;
     }
 
     try {
-      // 2. Chamar a API PUT
       await api.put(`/users/${userId}`, { type: newRole });
       toast.success(`Tipo do usuário ${newRole} atualizado com sucesso!`);
       
-      // 3. Atualiza a lista localmente (para que o dropdown não reverta)
       setUsers((prevUsers) =>
         prevUsers.map((u) =>
           u.id === userId ? { ...u, type: newRole } : u
@@ -66,13 +62,11 @@ export default function AdminUsersPage() {
       console.error('Erro ao mudar tipo:', err);
       toast.error('Não foi possível atualizar o tipo.');
       
-      // Se houver erro, forçamos um refetch para o dropdown voltar ao valor correto
       fetchUsers(); 
     }
   };
 
   const handleDelete = async (userId: string) => {
-    // 1. Bloqueia auto-deleção (Frontend Check)
     if (userId === adminUser?.id) {
       toast.error('Você não pode deletar a si mesmo.');
       return;
@@ -80,10 +74,9 @@ export default function AdminUsersPage() {
     
     if (window.confirm('Tem certeza que quer deletar este usuário? Esta ação é irreversível.')) {
       try {
-        // 2. Chamar a API DELETE
         await api.delete(`/users/${userId}`);
         toast.success('Usuário deletado com sucesso.');
-        await fetchUsers(); // Atualiza a lista
+        await fetchUsers();
         
       } catch (err: any) {
         if (err.response?.status === 409) {
@@ -95,22 +88,18 @@ export default function AdminUsersPage() {
     }
   };
 
-  // --- NOVO: Lógica de Filtragem ---
   const filteredUsers = users.filter(user => {
     if (roleFilter === 'all') {
-      return true; // Mostra todos
+      return true; 
     }
-    return user.type === roleFilter; // Mostra só CLIENT ou ADMIN
+    return user.type === roleFilter; 
   });
 
-  // --- 7. JSX da Página (Alterado) ---
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-      {/* ALTERADO: Título e Filtro agora na mesma linha */}
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <h1 className="text-3xl font-bold text-gray-900">Gestão de Usuários</h1>
-        
-        {/* NOVO: Dropdown de Filtro */}
+      
         <div className="flex items-center gap-2">
           <label htmlFor="roleFilter" className="text-sm font-medium text-gray-700">
             Mostrar:
@@ -134,7 +123,6 @@ export default function AdminUsersPage() {
         <div className="overflow-x-auto rounded-lg bg-white p-6 shadow-md">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
-              {/* ... (cabeçalho da tabela - sem alteração) ... */}
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nome</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email / Telefone</th>
@@ -142,8 +130,7 @@ export default function AdminUsersPage() {
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Ações</th>
               </tr>
             </thead>
-            
-            {/* ALTERADO: TBody agora usa filteredUsers */}
+          
             <tbody className="divide-y divide-gray-200 bg-white">
               {filteredUsers.length === 0 ? (
                 <tr>

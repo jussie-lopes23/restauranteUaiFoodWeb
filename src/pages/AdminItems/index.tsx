@@ -4,7 +4,6 @@ import { toast } from 'react-hot-toast';
 import { Trash, Edit } from 'lucide-react';
 import axios from 'axios';
 
-// --- 1. Definição de Tipos ---
 interface Category {
   id: string;
   description: string;
@@ -17,7 +16,6 @@ interface Item {
   category?: Category; 
 }
 
-// Função de formatação
 const formatCurrency = (value: number | string) => {
   const numericValue = typeof value === 'string' ? parseFloat(value) : value;
   return new Intl.NumberFormat('pt-BR', {
@@ -26,7 +24,6 @@ const formatCurrency = (value: number | string) => {
   }).format(numericValue);
 };
 
-// Estado inicial do formulário
 const initialFormState = {
   description: '',
   unitPrice: '',
@@ -34,7 +31,6 @@ const initialFormState = {
 };
 
 export default function AdminItemsPage() {
-  // --- 2. Hooks de Estado ---
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +43,6 @@ export default function AdminItemsPage() {
 
   const formRef = useRef<HTMLDivElement>(null);
 
-  // --- 3. Função para buscar os dados ---
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -71,12 +66,11 @@ export default function AdminItemsPage() {
     }
   };
 
-  // --- 4. Buscar dados ao carregar ---
+ -
   useEffect(() => {
     fetchData();
-  }, []); // eslint-disable-line
+  }, []); 
 
-  // --- 5. Handlers do Formulário ---
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -138,7 +132,6 @@ export default function AdminItemsPage() {
   };
 
   
-  // Lógica de filtragem
   const filteredItems = items.filter(item => {
     if (categoryFilter === 'all') {
       return true;
@@ -147,12 +140,10 @@ export default function AdminItemsPage() {
   });
 
 
-  // --- 6. JSX da Página ---
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       <h1 className="mb-8 text-3xl font-bold text-gray-900">Gestão de Cardápio (Itens)</h1>
 
-      {/* --- FORMULÁRIO DE CRIAÇÃO/EDIÇÃO (AGORA ESTÁ AQUI!) --- */}
       <div ref={formRef} className="mb-10 rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-6 text-2xl font-semibold text-gray-800">
           {editingItemId ? 'Editar Item' : 'Adicionar Novo Item'}
@@ -195,7 +186,6 @@ export default function AdminItemsPage() {
                 className="mt-1 block w-full rounded-md border p-2"
                 required
               >
-                {/* Previne erro caso as categorias ainda não tenham carregado */}
                 {categories.length === 0 && <option>A carregar...</option>}
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.description}</option>
@@ -224,7 +214,6 @@ export default function AdminItemsPage() {
         </form>
       </div>
 
-      {/* --- LISTA DE ITENS EXISTENTES (COM O FILTRO) --- */}
       <div className="rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <h2 className="text-2xl font-semibold text-gray-800">Itens Cadastrados</h2>
