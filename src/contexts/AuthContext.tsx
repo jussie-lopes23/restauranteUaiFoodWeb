@@ -1,8 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import api from '../services/api'; // Nossa instância do axios
+import api from '../services/api';
 
-// 1. Define o formato dos dados do usuário (do nosso back-end)
 interface User {
   id: string;
   name: string;
@@ -11,68 +10,66 @@ interface User {
   phone: string;
 }
 
-// 2. Define o que o nosso Contexto vai fornecer
+//Define o que o Contexto vai fornecer
 interface AuthContextData {
-  user: User | null;         // Os dados do usuário logado
-  token: string | null;      // O JWT
-  loading: boolean;          // True enquanto valida o token na inicialização
+  user: User | null;         
+  token: string | null;     
+  loading: boolean;         
   login: (token: string) => Promise<User>;
-  logout: () => void;           // Função de Logout
+  logout: () => void;         
 }
 
-// 3. Define as props do nosso Provider
+
 interface AuthProviderProps {
-  children: ReactNode; // "children" são os componentes que ele vai envolver
+  children: ReactNode; 
 }
 
-// 4. Cria o Contexto
+//Cria o Contexto
 export const AuthContext = createContext({} as AuthContextData);
 
-// 5. Cria o "Provider" (o componente que fornece os dados)
+//Cria o componente que fornece os dados
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Começa true
+  const [loading, setLoading] = useState(true); 
 
-  // 6. Roda UMA VEZ quando o app carrega
   useEffect(() => {
     async function loadStorageData() {
-      // Busca o token salvo no localStorage
+
       const storedToken = localStorage.getItem('@UaiFood:token');
 
       if (storedToken) {
         try {
-          // Se achou um token, configura o axios para usá-lo
+          //configura o axios para usar o token
           api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
           
-          // Valida o token chamando a rota /me
+          // Valida o token buscando os dados do usuário
           const response = await api.get('/users/me'); 
           
-          setUser(response.data); // Salva os dados do usuário
-          setToken(storedToken);  // Salva o token
+          setUser(response.data);
+          setToken(storedToken); 
         } catch (err) {
-          // Se o token for inválido (ex: expirado), limpa
           console.error("Falha ao validar token:", err);
           localStorage.removeItem('@UaiFood:token');
         }
       }
-      // Termina o loading (mesmo se falhar)
+    
       setLoading(false); 
     }
     loadStorageData();
-  }, []); // O array vazio [] garante que isso rode só uma vez
+  }, []);
 
-  // 7. Função de Login
+  //Função de Login
   const login = async (newToken: string) => {
     setLoading(true);
     try {
-      // 1. Salva o token no localStorage
+      //Salva o token no localStorage
       localStorage.setItem('@UaiFood:token', newToken);
 
-      // 2. Define o token no header do axios
+      //Define o token no header do axios
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       
-      // 3. Busca os dados do usuário (rota /me)
+      //Busca os dados do usuário 
       const response = await api.get('/users/me');
       setUser(response.data);
       setToken(newToken);
@@ -82,13 +79,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (err) {
       console.error("Falha no login:", err);
       logout(); 
-      throw err; // Lança o erro para quem chamou tratar
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // 8. Função de Logout
+  
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -96,10 +93,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     delete api.defaults.headers.common['Authorization'];
   };
 
-  // 9. Fornece os dados para os "children"
+  
   return (
     <AuthContext.Provider value={{ user, token, loading, login, logout }}>
-      {/* Só renderiza o app quando o loading acabar */}
       {!loading && children} 
     </AuthContext.Provider>
   );
